@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>OverSite</title>
+    <meta name="author" content="Karl Ding">
+    <meta name="description" content="Keylogger (lskdata.bin) log file viewer and decryption">
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<article id="container">
+    <div>
+        <img src="img/noun_project_9133.svg"/>
+        <h1 id="title">OverSite</h1>
+    </div>
+    <section>
+        <p>Select <strong>lskdata.bin</strong> file to decrypt</p>
+    </section>
+
+    <input type="file" id="file-input" accept=".bin" />
+
+    <div id="drop">
+        <div class="label-group">
+            <input id="old" type="radio" name="version" value="old" checked/>
+            <label for="old">old lskdata.bin</label>
+        </div>
+
+        <div class="label-group">
+            <input id="new" type="radio" name="version" value="new"/>
+            <label for="new">new lskdata.bin</label>
+        </div>
+    </div>
+
+    <div id="decryption"></div>
+</article>
+
+<script src="js/jdataview.js"></script>
+<script src="js/jbinary.js"></script>
+<script src="keys/key.js"></script>
+<script>
+if (window.File && window.FileList && window.Blob) {
+    /**
+     * Converts a string to Hex
+     * @param  int number [description]
+     * @param  int length [description]
+     * @return string     [description]
+     */
+    var toHex = function(number, length) {
+        var s = number.toString(16);
+        while (s.length < length) {
+            s = '0' + s;
+        }
+        return s;
+    };
+
+
+    /**
+     * Inserts HTML line breaks before all newlines in a string
+     * @param  string   str        the input string
+     * @param  boolean  is_xhtml   [description]
+     * @return string              [description]
+     */
+    var nl2br = function(str, is_xhtml) {
+        var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
+
+        return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
+    };
+
+
+    var fileInput = document.getElementById('file-input');
+
+    fileInput.addEventListener('change', function () {
+        jBinary.loadData(fileInput.files[0], function(err, data) {
+            var binary = new jBinary(data);
+            var data = binary.read('blob');
+
+            var s = "";
+            var n = 0;
+            
+            for (var i in data) {
+                if (typeof data[i] !== 'object' && typeof data[i] !== 'function') {
+                    var tmp = "";
+                    if (document.getElementById("old").checked) {
+                        tmp = decrypt(toHex(data[i]), (i % 4), mod_old);
+                    } else {
+                        tmp = decrypt(toHex(data[i], (i % 4), mod_new));
+                    }
+                    s += tmp;
+                }
+            }
+
+            document.getElementById("decryption").innerHTML = nl2br(s);
+        });
+    });
+} else {
+    alert('The HTML5 File APIs are not fully supported in this browser.');
+}
+</script>
+</body>
+</html>
