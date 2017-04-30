@@ -76,14 +76,14 @@ if (window.File && window.FileList && window.Blob) {
 
             var s = "";
             var n = 0;
-            
+
             for (var i in data) {
                 if (typeof data[i] !== 'object' && typeof data[i] !== 'function') {
                     var tmp = "";
                     if (document.getElementById("old").checked) {
                         tmp = decrypt(toHex(data[i]), (i % 4), mod_old);
                     } else {
-                        tmp = decrypt(toHex(data[i], (i % 4), mod_new));
+                        tmp = decrypt(toHex(data[i]), (i % 4), mod_new);
                     }
                     s += tmp;
                 }
